@@ -287,6 +287,13 @@
       XLSX.writeFile(wb, "contributions.xlsx");
     }
 
+    function exportAssistances() {
+      const ws = XLSX.utils.json_to_sheet(assistances);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Assistances");
+      XLSX.writeFile(wb, "assistances.xlsx");
+    }
+
     function importMembers(input) {
       const file = input.files[0];
       const reader = new FileReader();
@@ -552,6 +559,7 @@
     </thead>
     <tbody></tbody>
   </table>
+  <button class="btn btn-success" onclick="exportAssistances()">Exporter vers Excel</button>
 </div>
 
 </body>
