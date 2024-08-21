@@ -1,38 +1,384 @@
-<html><head><base href="https://mutual-aid.org/">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mutuelle de Solidarité - Accueil</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<style>
-  body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f0f8ff;
-  }
-  .navbar {
-    background-color: #007bff;
-  }
-  .navbar-brand, .nav-link {
-    color: white !important;
-  }
-  .container {
-    background-color: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    margin-top: 20px;
-  }
-  h2 {
-    color: #007bff;
-  }
-  .jumbotron {
-    background-color: #e9ecef;
-    padding: 2rem 1rem;
-    margin-bottom: 2rem;
-    border-radius: .3rem;
-  }
-</style>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mutuelle de Solidarité - Accueil</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkyw4l2eV-lneXEMVWT1VYtRSGetfoCPo",
+      authDomain: "mutuelisp.firebaseapp.com",
+      projectId: "mutuelisp",
+      storageBucket: "mutuelisp.appspot.com",
+      messagingSenderId: "551658970013",
+      appId: "1:551658970013:web:43bc3efb803d756f1eed74"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let members = [];
+    let contributions = [];
+    let assistanceTypes = [];
+    let assistances = [];
+
+    async function fetchMembers() {
+      const querySnapshot = await getDocs(collection(db, "members"));
+      members = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderMembersTable();
+    }
+
+    async function fetchContributions() {
+      const querySnapshot = await getDocs(collection(db, "contributions"));
+      contributions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderContributionsTable();
+    }
+
+    async function fetchAssistanceTypes() {
+      const querySnapshot = await getDocs(collection(db, "assistanceTypes"));
+      assistanceTypes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderAssistanceTypesTable();
+    }
+
+    async function fetchAssistances() {
+      const querySnapshot = await getDocs(collection(db, "assistances"));
+      assistances = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderAssistancesTable();
+    }
+
+    function showHome() {
+      hideAllSections();
+      document.getElementById('homeSection').style.display = 'block';
+    }
+
+    function showMembers() {
+      hideAllSections();
+      document.getElementById('membersSection').style.display = 'block';
+    }
+
+    function showContributions() {
+      hideAllSections();
+      document.getElementById('contributionsSection').style.display = 'block';
+    }
+
+    function showAssistanceTypes() {
+      hideAllSections();
+      document.getElementById('assistanceTypesSection').style.display = 'block';
+    }
+
+    function showAssistances() {
+      hideAllSections();
+      document.getElementById('assistancesSection').style.display = 'block';
+      populateMemberSelect();
+      populateAssistanceTypeSelect();
+    }
+
+    function hideAllSections() {
+      document.getElementById('homeSection').style.display = 'none';
+      document.getElementById('membersSection').style.display = 'none';
+      document.getElementById('contributionsSection').style.display = 'none';
+      document.getElementById('assistanceTypesSection').style.display = 'none';
+      document.getElementById('assistancesSection').style.display = 'none';
+    }
+
+    document.getElementById('memberForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const matricule = document.getElementById('matricule').value;
+      const nomComplet = document.getElementById('nomComplet').value;
+      const sexe = document.getElementById('sexe').value;
+
+      const member = { matricule, nomComplet, sexe };
+      const memberRef = doc(db, "members", matricule);
+      await updateDoc(memberRef, member);
+
+      fetchMembers();
+      this.reset();
+    });
+
+    document.getElementById('contributionForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const matricule = document.getElementById('matriculeContribution').value;
+      const montant = document.getElementById('montant').value;
+      const date = document.getElementById('dateContribution').value;
+
+      const contribution = { matricule, montant, date };
+      await addDoc(collection(db, "contributions"), contribution);
+
+      fetchContributions();
+      this.reset();
+    });
+
+    document.getElementById('assistanceTypeForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const type = document.getElementById('typeAssistance').value;
+      const montant = document.getElementById('montantAssistance').value;
+
+      const assistanceType = { type, montant };
+      const typeRef = doc(db, "assistanceTypes", type);
+      await updateDoc(typeRef, assistanceType);
+
+      fetchAssistanceTypes();
+      this.reset();
+    });
+
+    document.getElementById('assistanceForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const memberMatricule = document.getElementById('memberSelect').value;
+      const assistanceType = document.getElementById('assistanceTypeSelect').value;
+      const date = document.getElementById('dateAssistance').value;
+
+      const member = members.find(m => m.matricule === memberMatricule);
+      const type = assistanceTypes.find(at => at.type === assistanceType);
+
+      if (member && type) {
+        const assistance = {
+          date,
+          nomMembre: member.nomComplet,
+          typeAssistance: type.type,
+          montant: type.montant
+        };
+        await addDoc(collection(db, "assistances"), assistance);
+        fetchAssistances();
+      }
+
+      this.reset();
+    });
+
+    function renderMembersTable() {
+      const tbody = document.querySelector('#membersTable tbody');
+      tbody.innerHTML = '';
+      members.forEach(member => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${member.matricule}</td>
+          <td>${member.nomComplet}</td>
+          <td>${member.sexe}</td>
+          <td>
+            <button class="btn btn-sm btn-warning" onclick="editMember('${member.matricule}')">Modifier</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteMember('${member.matricule}')">Supprimer</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderContributionsTable() {
+      const tbody = document.querySelector('#contributionsTable tbody');
+      tbody.innerHTML = '';
+      contributions.forEach((contribution, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${contribution.matricule}</td>
+          <td>${contribution.montant}</td>
+          <td>${contribution.date}</td>
+          <td>
+            <button class="btn btn-sm btn-warning" onclick="editContribution(${index})">Modifier</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteContribution(${index})">Supprimer</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAssistanceTypesTable() {
+      const tbody = document.querySelector('#assistanceTypesTable tbody');
+      tbody.innerHTML = '';
+      assistanceTypes.forEach((type, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${type.type}</td>
+          <td>${type.montant}</td>
+          <td>
+            <button class="btn btn-sm btn-warning" onclick="editAssistanceType(${index})">Modifier</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteAssistanceType(${index})">Supprimer</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAssistancesTable() {
+      const tbody = document.querySelector('#assistancesTable tbody');
+      tbody.innerHTML = '';
+      assistances.forEach((assistance, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${assistance.date}</td>
+          <td>${assistance.nomMembre}</td>
+          <td>${assistance.typeAssistance}</td>
+          <td>${assistance.montant}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deleteAssistance(${index})">Supprimer</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function editMember(matricule) {
+      const member = members.find(m => m.matricule === matricule);
+      if (member) {
+        document.getElementById('matricule').value = member.matricule;
+        document.getElementById('nomComplet').value = member.nomComplet;
+        document.getElementById('sexe').value = member.sexe;
+      }
+    }
+
+    async function deleteMember(matricule) {
+      await deleteDoc(doc(db, "members", matricule));
+      fetchMembers();
+    }
+
+    async function editContribution(index) {
+      const contribution = contributions[index];
+      document.getElementById('matriculeContribution').value = contribution.matricule;
+      document.getElementById('montant').value = contribution.montant;
+      document.getElementById('dateContribution').value = contribution.date;
+      await deleteDoc(doc(db, "contributions", contribution.id));
+      fetchContributions();
+    }
+
+    async function deleteContribution(index) {
+      const contribution = contributions[index];
+      await deleteDoc(doc(db, "contributions", contribution.id));
+      fetchContributions();
+    }
+
+    async function editAssistanceType(index) {
+      const type = assistanceTypes[index];
+      document.getElementById('typeAssistance').value = type.type;
+      document.getElementById('montantAssistance').value = type.montant;
+      await deleteDoc(doc(db, "assistanceTypes", type.id));
+      fetchAssistanceTypes();
+    }
+
+    async function deleteAssistanceType(index) {
+      const type = assistanceTypes[index];
+      await deleteDoc(doc(db, "assistanceTypes", type.id));
+      fetchAssistanceTypes();
+    }
+
+    async function deleteAssistance(index) {
+      const assistance = assistances[index];
+      await deleteDoc(doc(db, "assistances", assistance.id));
+      fetchAssistances();
+    }
+
+    function exportMembers() {
+      const ws = XLSX.utils.json_to_sheet(members);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Membres");
+      XLSX.writeFile(wb, "membres.xlsx");
+    }
+
+    function exportContributions() {
+      const ws = XLSX.utils.json_to_sheet(contributions);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Contributions");
+      XLSX.writeFile(wb, "contributions.xlsx");
+    }
+
+    function importMembers(input) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        jsonData.forEach(async member => {
+          const memberRef = doc(db, "members", member.matricule);
+          await updateDoc(memberRef, member);
+        });
+        fetchMembers();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function importContributions(input) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        jsonData.forEach(async contribution => {
+          await addDoc(collection(db, "contributions"), contribution);
+        });
+        fetchContributions();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function populateMemberSelect() {
+      const select = document.getElementById('memberSelect');
+      select.innerHTML = '';
+      members.forEach(member => {
+        const option = document.createElement('option');
+        option.value = member.matricule;
+        option.textContent = member.nomComplet;
+        select.appendChild(option);
+      });
+    }
+
+    function populateAssistanceTypeSelect() {
+      const select = document.getElementById('assistanceTypeSelect');
+      select.innerHTML = '';
+      assistanceTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type.type;
+        option.textContent = `${type.type} (${type.montant})`;
+        select.appendChild(option);
+      });
+    }
+
+    // Initial render
+    fetchMembers();
+    fetchContributions();
+    fetchAssistanceTypes();
+    fetchAssistances();
+    showHome();
+  </script>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f8ff;
+    }
+    .navbar {
+      background-color: #007bff;
+    }
+    .navbar-brand, .nav-link {
+      color: white !important;
+    }
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    h2 {
+      color: #007bff;
+    }
+    .jumbotron {
+      background-color: #e9ecef;
+      padding: 2rem 1rem;
+      margin-bottom: 2rem;
+      border-radius: .3rem;
+    }
+  </style>
 </head>
 <body>
 
@@ -207,311 +553,6 @@
     <tbody></tbody>
   </table>
 </div>
-
-<script>
-let members = [];
-let contributions = [];
-let assistanceTypes = [];
-let assistances = [];
-
-function showHome() {
-  hideAllSections();
-  document.getElementById('homeSection').style.display = 'block';
-}
-
-function showMembers() {
-  hideAllSections();
-  document.getElementById('membersSection').style.display = 'block';
-}
-
-function showContributions() {
-  hideAllSections();
-  document.getElementById('contributionsSection').style.display = 'block';
-}
-
-function showAssistanceTypes() {
-  hideAllSections();
-  document.getElementById('assistanceTypesSection').style.display = 'block';
-}
-
-function showAssistances() {
-  hideAllSections();
-  document.getElementById('assistancesSection').style.display = 'block';
-  populateMemberSelect();
-  populateAssistanceTypeSelect();
-}
-
-function hideAllSections() {
-  document.getElementById('homeSection').style.display = 'none';
-  document.getElementById('membersSection').style.display = 'none';
-  document.getElementById('contributionsSection').style.display = 'none';
-  document.getElementById('assistanceTypesSection').style.display = 'none';
-  document.getElementById('assistancesSection').style.display = 'none';
-}
-
-document.getElementById('memberForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const matricule = document.getElementById('matricule').value;
-  const nomComplet = document.getElementById('nomComplet').value;
-  const sexe = document.getElementById('sexe').value;
-  
-  const member = { matricule, nomComplet, sexe };
-  const index = members.findIndex(m => m.matricule === matricule);
-  
-  if (index !== -1) {
-    members[index] = member;
-  } else {
-    members.push(member);
-  }
-  
-  renderMembersTable();
-  this.reset();
-});
-
-document.getElementById('contributionForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const matricule = document.getElementById('matriculeContribution').value;
-  const montant = document.getElementById('montant').value;
-  const date = document.getElementById('dateContribution').value;
-  
-  const contribution = { matricule, montant, date };
-  contributions.push(contribution);
-  
-  renderContributionsTable();
-  this.reset();
-});
-
-document.getElementById('assistanceTypeForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const type = document.getElementById('typeAssistance').value;
-  const montant = document.getElementById('montantAssistance').value;
-  
-  const assistanceType = { type, montant };
-  const index = assistanceTypes.findIndex(at => at.type === type);
-  
-  if (index !== -1) {
-    assistanceTypes[index] = assistanceType;
-  } else {
-    assistanceTypes.push(assistanceType);
-  }
-  
-  renderAssistanceTypesTable();
-  this.reset();
-});
-
-document.getElementById('assistanceForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const memberMatricule = document.getElementById('memberSelect').value;
-  const assistanceType = document.getElementById('assistanceTypeSelect').value;
-  const date = document.getElementById('dateAssistance').value;
-  
-  const member = members.find(m => m.matricule === memberMatricule);
-  const type = assistanceTypes.find(at => at.type === assistanceType);
-  
-  if (member && type) {
-    const assistance = {
-      date,
-      nomMembre: member.nomComplet,
-      typeAssistance: type.type,
-      montant: type.montant
-    };
-    assistances.push(assistance);
-    renderAssistancesTable();
-  }
-  
-  this.reset();
-});
-
-function renderMembersTable() {
-  const tbody = document.querySelector('#membersTable tbody');
-  tbody.innerHTML = '';
-  members.forEach(member => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${member.matricule}</td>
-      <td>${member.nomComplet}</td>
-      <td>${member.sexe}</td>
-      <td>
-        <button class="btn btn-sm btn-warning" onclick="editMember('${member.matricule}')">Modifier</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteMember('${member.matricule}')">Supprimer</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderContributionsTable() {
-  const tbody = document.querySelector('#contributionsTable tbody');
-  tbody.innerHTML = '';
-  contributions.forEach((contribution, index) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${contribution.matricule}</td>
-      <td>${contribution.montant}</td>
-      <td>${contribution.date}</td>
-      <td>
-        <button class="btn btn-sm btn-warning" onclick="editContribution(${index})">Modifier</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteContribution(${index})">Supprimer</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderAssistanceTypesTable() {
-  const tbody = document.querySelector('#assistanceTypesTable tbody');
-  tbody.innerHTML = '';
-  assistanceTypes.forEach((type, index) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${type.type}</td>
-      <td>${type.montant}</td>
-      <td>
-        <button class="btn btn-sm btn-warning" onclick="editAssistanceType(${index})">Modifier</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteAssistanceType(${index})">Supprimer</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderAssistancesTable() {
-  const tbody = document.querySelector('#assistancesTable tbody');
-  tbody.innerHTML = '';
-  assistances.forEach((assistance, index) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${assistance.date}</td>
-      <td>${assistance.nomMembre}</td>
-      <td>${assistance.typeAssistance}</td>
-      <td>${assistance.montant}</td>
-      <td>
-        <button class="btn btn-sm btn-danger" onclick="deleteAssistance(${index})">Supprimer</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function editMember(matricule) {
-  const member = members.find(m => m.matricule === matricule);
-  if (member) {
-    document.getElementById('matricule').value = member.matricule;
-    document.getElementById('nomComplet').value = member.nomComplet;
-    document.getElementById('sexe').value = member.sexe;
-  }
-}
-
-function deleteMember(matricule) {
-  members = members.filter(m => m.matricule !== matricule);
-  renderMembersTable();
-}
-
-function editContribution(index) {
-  const contribution = contributions[index];
-  document.getElementById('matriculeContribution').value = contribution.matricule;
-  document.getElementById('montant').value = contribution.montant;
-  document.getElementById('dateContribution').value = contribution.date;
-  contributions.splice(index, 1);
-  renderContributionsTable();
-}
-
-function deleteContribution(index) {
-  contributions.splice(index, 1);
-  renderContributionsTable();
-}
-
-function editAssistanceType(index) {
-  const type = assistanceTypes[index];
-  document.getElementById('typeAssistance').value = type.type;
-  document.getElementById('montantAssistance').value = type.montant;
-  assistanceTypes.splice(index, 1);
-  renderAssistanceTypesTable();
-}
-
-function deleteAssistanceType(index) {
-  assistanceTypes.splice(index, 1);
-  renderAssistanceTypesTable();
-}
-
-function deleteAssistance(index) {
-  assistances.splice(index, 1);
-  renderAssistancesTable();
-}
-
-function exportMembers() {
-  const ws = XLSX.utils.json_to_sheet(members);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Membres");
-  XLSX.writeFile(wb, "membres.xlsx");
-}
-
-function exportContributions() {
-  const ws = XLSX.utils.json_to_sheet(contributions);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Contributions");
-  XLSX.writeFile(wb, "contributions.xlsx");
-}
-
-function importMembers(input) {
-  const file = input.files[0];
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, {type: 'array'});
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-    members = jsonData;
-    renderMembersTable();
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function importContributions(input) {
-  const file = input.files[0];
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, {type: 'array'});
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-    contributions = jsonData;
-    renderContributionsTable();
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function populateMemberSelect() {
-  const select = document.getElementById('memberSelect');
-  select.innerHTML = '';
-  members.forEach(member => {
-    const option = document.createElement('option');
-    option.value = member.matricule;
-    option.textContent = member.nomComplet;
-    select.appendChild(option);
-  });
-}
-
-function populateAssistanceTypeSelect() {
-  const select = document.getElementById('assistanceTypeSelect');
-  select.innerHTML = '';
-  assistanceTypes.forEach(type => {
-    const option = document.createElement('option');
-    option.value = type.type;
-    option.textContent = `${type.type} (${type.montant})`;
-    select.appendChild(option);
-  });
-}
-
-// Initial render
-renderMembersTable();
-renderContributionsTable();
-renderAssistanceTypesTable();
-renderAssistancesTable();
-showHome();
-</script>
 
 </body>
 </html>
