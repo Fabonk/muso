@@ -5,7 +5,211 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mutuelle de Solidarité - Accueil</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ 
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f8ff;
+    }
+    .navbar {
+      background-color: #007bff;
+    }
+    .navbar-brand, .nav-link {
+      color: white !important;
+    }
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    h2 {
+      color: #007bff;
+    }
+    .jumbotron {
+      background-color: #e9ecef;
+      padding: 2rem 1rem;
+      margin-bottom: 2rem;
+      border-radius: .3rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#" onclick="showHome()">Mutuelle de Solidarité</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showHome()">Accueil</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showMembers()">Gestion des Membres</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showContributions()">Gestion des Contributions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showAssistanceTypes()">Types d'Assistance</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showAssistances()">Gestion des Assistances</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container" id="homeSection">
+  <div class="jumbotron">
+    <h1 class="display-4">Bienvenue à la Mutuelle de Solidarité</h1>
+    <p class="lead">Notre mission est de promouvoir l'entraide et la solidarité au sein de notre communauté.</p>
+    <hr class="my-4">
+    <p>Ensemble, nous pouvons créer un réseau de soutien solide pour tous nos membres.</p>
+    <a class="btn btn-primary btn-lg" href="#" role="button" onclick="showMembers()">Voir les membres</a>
+  </div>
+</div>
+
+<div class="container" id="membersSection" style="display: none;">
+  <h2>Gestion des Membres</h2>
+  <form id="memberForm">
+    <div class="mb-3">
+      <label for="matricule" class="form-label">Matricule</label>
+      <input type="text" class="form-control" id="matricule" required>
+    </div>
+    <div class="mb-3">
+      <label for="nomComplet" class="form-label">Nom complet</label>
+      <input type="text" class="form-control" id="nomComplet" required>
+    </div>
+    <div class="mb-3">
+      <label for="sexe" class="form-label">Sexe</label>
+      <select class="form-select" id="sexe" required>
+        <option value="">Choisir...</option>
+        <option value="M">Masculin</option>
+        <option value="F">Féminin</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+  </form>
+  <hr>
+  <h3>Liste des Membres</h3>
+  <table class="table table-striped" id="membersTable">
+    <thead>
+      <tr>
+        <th>Matricule</th>
+        <th>Nom complet</th>
+        <th>Sexe</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button class="btn btn-success" onclick="exportMembers()">Exporter vers Excel</button>
+  <input type="file" id="importMembers" accept=".xlsx" style="display: none;" onchange="importMembers(this)">
+  <button class="btn btn-info" onclick="document.getElementById('importMembers').click()">Importer depuis Excel</button>
+</div>
+
+<div class="container" id="contributionsSection" style="display: none;">
+  <h2>Gestion des Contributions</h2>
+  <form id="contributionForm">
+    <div class="mb-3">
+      <label for="matriculeContribution" class="form-label">Matricule du membre</label>
+      <input type="text" class="form-control" id="matriculeContribution" required>
+    </div>
+    <div class="mb-3">
+      <label for="montant" class="form-label">Montant</label>
+      <input type="number" class="form-control" id="montant" required>
+    </div>
+    <div class="mb-3">
+      <label for="dateContribution" class="form-label">Date de contribution</label>
+      <input type="date" class="form-control" id="dateContribution" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+  </form>
+  <hr>
+  <h3>Liste des Contributions</h3>
+  <table class="table table-striped" id="contributionsTable">
+    <thead>
+      <tr>
+        <th>Matricule</th>
+        <th>Montant</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button class="btn btn-success" onclick="exportContributions()">Exporter vers Excel</button>
+  <input type="file" id="importContributions" accept=".xlsx" style="display: none;" onchange="importContributions(this)">
+  <button class="btn btn-info" onclick="document.getElementById('importContributions').click()">Importer depuis Excel</button>
+</div>
+
+<div class="container" id="assistanceTypesSection" style="display: none;">
+  <h2>Gestion des Types d'Assistance</h2>
+  <form id="assistanceTypeForm">
+    <div class="mb-3">
+      <label for="typeAssistance" class="form-label">Type d'Assistance</label>
+      <input type="text" class="form-control" id="typeAssistance" required>
+    </div>
+    <div class="mb-3">
+      <label for="montantAssistance" class="form-label">Montant</label>
+      <input type="number" class="form-control" id="montantAssistance" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+  </form>
+  <hr>
+  <h3>Liste des Types d'Assistance</h3>
+  <table class="table table-striped" id="assistanceTypesTable">
+    <thead>
+      <tr>
+        <th>Type d'Assistance</th>
+        <th>Montant</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div class="container" id="assistancesSection" style="display: none;">
+  <h2>Gestion des Assistances</h2>
+  <form id="assistanceForm">
+    <div class="mb-3">
+      <label for="memberSelect" class="form-label">Membre</label>
+      <select class="form-select" id="memberSelect" required></select>
+    </div>
+    <div class="mb-3">
+      <label for="assistanceTypeSelect" class="form-label">Type d'Assistance</label>
+      <select class="form-select" id="assistanceTypeSelect" required></select>
+    </div>
+    <div class="mb-3">
+      <label for="dateAssistance" class="form-label">Date d'Assistance</label>
+      <input type="date" class="form-control" id="dateAssistance" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+  </form>
+  <hr>
+  <h3>Liste des Assistances</h3>
+  <table class="table table-striped" id="assistancesTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Nom du Membre</th>
+        <th>Type d'Assistance</th>
+        <th>Montant</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button class="btn btn-success" onclick="exportAssistances()">Exporter vers Excel</button>
+</div>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script type="module">
     // Import the functions you need from the SDKs you need
@@ -358,209 +562,5 @@
     fetchAssistances();
     showHome();
   </script>
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #f0f8ff;
-    }
-    .navbar {
-      background-color: #007bff;
-    }
-    .navbar-brand, .nav-link {
-      color: white !important;
-    }
-    .container {
-      background-color: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin-top: 20px;
-    }
-    h2 {
-      color: #007bff;
-    }
-    .jumbotron {
-      background-color: #e9ecef;
-      padding: 2rem 1rem;
-      margin-bottom: 2rem;
-      border-radius: .3rem;
-    }
-  </style>
-</head>
-<body>
-
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#" onclick="showHome()">Mutuelle de Solidarité</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="#" onclick="showHome()">Accueil</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" onclick="showMembers()">Gestion des Membres</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" onclick="showContributions()">Gestion des Contributions</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" onclick="showAssistanceTypes()">Types d'Assistance</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" onclick="showAssistances()">Gestion des Assistances</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<div class="container" id="homeSection">
-  <div class="jumbotron">
-    <h1 class="display-4">Bienvenue à la Mutuelle de Solidarité</h1>
-    <p class="lead">Notre mission est de promouvoir l'entraide et la solidarité au sein de notre communauté.</p>
-    <hr class="my-4">
-    <p>Ensemble, nous pouvons créer un réseau de soutien solide pour tous nos membres.</p>
-    <a class="btn btn-primary btn-lg" href="#" role="button" onclick="showMembers()">Voir les membres</a>
-  </div>
-</div>
-
-<div class="container" id="membersSection" style="display: none;">
-  <h2>Gestion des Membres</h2>
-  <form id="memberForm">
-    <div class="mb-3">
-      <label for="matricule" class="form-label">Matricule</label>
-      <input type="text" class="form-control" id="matricule" required>
-    </div>
-    <div class="mb-3">
-      <label for="nomComplet" class="form-label">Nom complet</label>
-      <input type="text" class="form-control" id="nomComplet" required>
-    </div>
-    <div class="mb-3">
-      <label for="sexe" class="form-label">Sexe</label>
-      <select class="form-select" id="sexe" required>
-        <option value="">Choisir...</option>
-        <option value="M">Masculin</option>
-        <option value="F">Féminin</option>
-      </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Enregistrer</button>
-  </form>
-  <hr>
-  <h3>Liste des Membres</h3>
-  <table class="table table-striped" id="membersTable">
-    <thead>
-      <tr>
-        <th>Matricule</th>
-        <th>Nom complet</th>
-        <th>Sexe</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button class="btn btn-success" onclick="exportMembers()">Exporter vers Excel</button>
-  <input type="file" id="importMembers" accept=".xlsx" style="display: none;" onchange="importMembers(this)">
-  <button class="btn btn-info" onclick="document.getElementById('importMembers').click()">Importer depuis Excel</button>
-</div>
-
-<div class="container" id="contributionsSection" style="display: none;">
-  <h2>Gestion des Contributions</h2>
-  <form id="contributionForm">
-    <div class="mb-3">
-      <label for="matriculeContribution" class="form-label">Matricule du membre</label>
-      <input type="text" class="form-control" id="matriculeContribution" required>
-    </div>
-    <div class="mb-3">
-      <label for="montant" class="form-label">Montant</label>
-      <input type="number" class="form-control" id="montant" required>
-    </div>
-    <div class="mb-3">
-      <label for="dateContribution" class="form-label">Date de contribution</label>
-      <input type="date" class="form-control" id="dateContribution" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Enregistrer</button>
-  </form>
-  <hr>
-  <h3>Liste des Contributions</h3>
-  <table class="table table-striped" id="contributionsTable">
-    <thead>
-      <tr>
-        <th>Matricule</th>
-        <th>Montant</th>
-        <th>Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button class="btn btn-success" onclick="exportContributions()">Exporter vers Excel</button>
-  <input type="file" id="importContributions" accept=".xlsx" style="display: none;" onchange="importContributions(this)">
-  <button class="btn btn-info" onclick="document.getElementById('importContributions').click()">Importer depuis Excel</button>
-</div>
-
-<div class="container" id="assistanceTypesSection" style="display: none;">
-  <h2>Gestion des Types d'Assistance</h2>
-  <form id="assistanceTypeForm">
-    <div class="mb-3">
-      <label for="typeAssistance" class="form-label">Type d'Assistance</label>
-      <input type="text" class="form-control" id="typeAssistance" required>
-    </div>
-    <div class="mb-3">
-      <label for="montantAssistance" class="form-label">Montant</label>
-      <input type="number" class="form-control" id="montantAssistance" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Enregistrer</button>
-  </form>
-  <hr>
-  <h3>Liste des Types d'Assistance</h3>
-  <table class="table table-striped" id="assistanceTypesTable">
-    <thead>
-      <tr>
-        <th>Type d'Assistance</th>
-        <th>Montant</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<div class="container" id="assistancesSection" style="display: none;">
-  <h2>Gestion des Assistances</h2>
-  <form id="assistanceForm">
-    <div class="mb-3">
-      <label for="memberSelect" class="form-label">Membre</label>
-      <select class="form-select" id="memberSelect" required></select>
-    </div>
-    <div class="mb-3">
-      <label for="assistanceTypeSelect" class="form-label">Type d'Assistance</label>
-      <select class="form-select" id="assistanceTypeSelect" required></select>
-    </div>
-    <div class="mb-3">
-      <label for="dateAssistance" class="form-label">Date d'Assistance</label>
-      <input type="date" class="form-control" id="dateAssistance" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Enregistrer</button>
-  </form>
-  <hr>
-  <h3>Liste des Assistances</h3>
-  <table class="table table-striped" id="assistancesTable">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Nom du Membre</th>
-        <th>Type d'Assistance</th>
-        <th>Montant</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button class="btn btn-success" onclick="exportAssistances()">Exporter vers Excel</button>
-</div>
-
 </body>
 </html>
